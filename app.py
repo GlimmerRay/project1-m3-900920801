@@ -22,12 +22,13 @@ import random
 
 import json
 
-app = flask.Flask(__name__, static_folder='./build/static')
-# This tells our Flask app to look at the results of `npm build` instead of the 
+app = flask.Flask(__name__, static_folder="./build/static")
+# This tells our Flask app to look at the results of `npm build` instead of the
 # actual files in /templates when we're looking for the index page file. This allows
 # us to load React code into a webpage. Look up create-react-app for more reading on
 # why this is necessary.
 bp = flask.Blueprint("bp", __name__, template_folder="./build")
+
 
 def create_the_db_object():
     database_url = os.environ["DATABASE_URL"]  # get the location of the database
@@ -35,19 +36,24 @@ def create_the_db_object():
     app.config[
         "SQLALCHEMY_DATABASE_URI"
     ] = database_url  # tell flask where to find the database
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Add this line to fix a warning
+    app.config[
+        "SQLALCHEMY_TRACK_MODIFICATIONS"
+    ] = False  # Add this line to fix a warning
     db = SQLAlchemy(app)  # initialize the database object
     return db
+
 
 def enable_cookies():
     app.secret_key = bytes(
         os.environ["FLASK_SECRET_KEY"], "utf-8"
     )  # Necessary to use cookies (which flask login uses)
 
+
 def create_the_login_manager():
     login_manager = LoginManager()
     login_manager.init_app(app)
     return login_manager
+
 
 db = create_the_db_object()
 enable_cookies()
@@ -86,7 +92,7 @@ def load_user(username):
     return User.query.filter_by(username=username).first()
 
 
-@bp.route('/index')
+@bp.route("/index")
 # @login_required
 def index():
     # TODO: insert the data fetched by your app main page here as a JSON
@@ -97,37 +103,41 @@ def index():
         data=data,
     )
 
+
 app.register_blueprint(bp)
 
-@app.route('/signup')
+
+@app.route("/signup")
 def signup():
-	...
+    ...
 
-@app.route('/signup', methods=["POST"])
+
+@app.route("/signup", methods=["POST"])
 def signup_post():
-	...
+    ...
 
-@app.route('/login')
+
+@app.route("/login")
 def login():
     ...
 
-@app.route('/login', methods=["POST"])
-def login_post():
-	...
 
-@app.route('/save', methods=["POST"])
+@app.route("/login", methods=["POST"])
+def login_post():
+    ...
+
+
+@app.route("/save", methods=["POST"])
 def save():
     ...
 
 
-@app.route('/')
+@app.route("/")
 def main():
-	...
-
-
+    ...
 
 
 app.run(
-    host=os.getenv('IP', '0.0.0.0'),
-    port=int(os.getenv('PORT', 8081)),
+    host=os.getenv("IP", "0.0.0.0"),
+    port=int(os.getenv("PORT", 8081)),
 )
