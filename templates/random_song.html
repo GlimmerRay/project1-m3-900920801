@@ -1,0 +1,22 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href={{ url_for('static', filename="random_song.css") }}>
+    <title>Random Song</title>
+</head>
+
+<body>
+    <div id="header">
+        <a href="/logout">logout</a>
+        <a href="/artistid_form">enter new favorite artists</a>
+    </div>
+    <div id="song-data">
+        <img src="{{ args['img_url'] }}" id="img-link" width=300px>
+        <p id="track-name">{{ args['track_name'] }}</p>
+        <p id="artist-name">{{ args['artist_name'] }}</p>
+        <p><a href="{{ args['preview_url'] }}" id="preview-link">preview</a></p>
+        <p><a href="{{ args['lyrics_url'] }}" id="lyrics-link">check out the lyrics!</a></p>
+    </div>
+</body>
+
+</html>

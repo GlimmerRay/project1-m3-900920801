@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href={{ url_for('static', filename='artistid_form.css') }}>
+    <title>Artist Id Form</title>
+</head>
+
+<body>
+    <a href="/logout">logout</a>
+    <a href="/random-song">random song</a>
+    <p>Enter the artist id of one of your favorite artists</p>
+    <form action="/artistid_form" method="POST" name="artistid-form">
+        <p><input type="text" id="artistid-input" name="artist-id"></p>
+        <input type="submit">
+    </form>
+</body>
+
+</html>
