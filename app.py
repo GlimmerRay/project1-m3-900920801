@@ -11,6 +11,7 @@ from flask_login import (
     current_user,
     login_required,
 )
+from flask_cors import CORS, cross_origin
 
 from spotify_stuff import get_track, artistid_isvalid
 from genius_stuff import get_song_url
@@ -23,6 +24,8 @@ import random
 import json
 
 app = flask.Flask(__name__, static_folder="./build/static")
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type' 
 # This tells our Flask app to look at the results of `npm build` instead of the
 # actual files in /templates when we're looking for the index page file. This allows
 # us to load React code into a webpage. Look up create-react-app for more reading on
@@ -127,9 +130,10 @@ def login_post():
     ...
 
 
-@app.route("/save", methods=["POST"])
+@app.route("/save", methods=["GET"])
 def save():
-    ...
+    print('XXXXXXXXXXXXXX')
+    return json.dumps(['xxx'])
 
 
 @app.route("/")
