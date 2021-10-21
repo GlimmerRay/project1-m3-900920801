@@ -94,6 +94,39 @@ class User(db.Model):
 def load_user(username):
     return User.query.filter_by(username=username).first()
 
+class DBHelpers:
+
+    @classmethod
+    def printAllUsers(cls):
+        print(User.query.all())
+    
+    @classmethod
+    def getUser(cls, username):
+        return User.query.filter_by(username=username).first()
+
+    @classmethod
+    def addNewUser(cls, name):
+        _user = User(username=name, artist_ids=[])
+        db.session.add(_user)
+        db.session.commit()
+    
+    @classmethod
+    def getArtistIds(cls, username):
+        return DBHelpers.getUser(username).artist_ids
+    
+    @classmethod
+    def removeAllData(cls):
+        db.drop_all()
+    
+    # this should be updated to make sure duplicate ids can't be added
+    @classmethod
+    def addArtistId(cls, username, artist_id): 
+        user = DBHelpers.getUser(username)
+        _ids = list(user.artist_ids)
+        _ids.append(artist_id)
+        user.artist_ids = _ids
+        db.session.commit()
+
 
 @bp.route("/index")
 # @login_required
@@ -109,25 +142,37 @@ def index():
 
 app.register_blueprint(bp)
 
-
-@app.route("/signup")
-def signup():
-    ...
-
-
 @app.route("/signup", methods=["POST"])
 def signup_post():
-    ...
-
-
-@app.route("/login")
-def login():
-    ...
+    data = json.loads(request.data)
+    username = data['username']
+    user = User.query.filter_by(username=username).first()
+    if user != None:
+        return json.dumps({'username_taken': True})
+    else:
+        DBHelpers.addNewUser(username)
+        print(User.query.all())
+        return json.dumps({'username_taken': False})
 
 
 @app.route("/login", methods=["POST"])
-def login_post():
-    ...
+def login():
+    print('attempting to log in')
+    data = json.loads(request.data)
+    username = data['username']
+    user = User.query.filter_by(username=username).first()
+    if user != None:
+        login_user(user)
+
+        return json.dumps({'login_successful': True, 'username': current_user.username})
+
+    else:
+        return json.dumps({'login_successful': False})
+
+
+# @app.route("/login", methods=["POST"])
+# def login_post():
+#     ...
 
 
 @app.route("/save", methods=["GET"])
