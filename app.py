@@ -126,6 +126,16 @@ class DBHelpers:
         _ids.append(artist_id)
         user.artist_ids = _ids
         db.session.commit()
+    
+    @classmethod
+    def addArtistIdList(cls, username, artist_ids):
+        user = DBHelpers.getUser(username)
+        _ids = list(user.artist_ids)
+        _ids.extend(artist_ids)
+        user.artist_ids = _ids
+        db.session.commit()
+
+
 
 
 @bp.route("/index")
@@ -175,10 +185,18 @@ def login():
 #     ...
 
 
-@app.route("/save", methods=["GET"])
+@app.route("/save", methods=["POST"])
 def save():
-    print('XXXXXXXXXXXXXX')
-    return json.dumps(['xxx'])
+    data = json.loads(request.data)
+    artist_ids = data['artist_ids']
+    username = data['username']
+    user = DBHelpers.getUser(username)
+    valid_ids = []
+    for _id in artist_ids:
+        if artistid_isvalid(_id):
+            valid_ids.append(_id)
+    DBHelpers.addArtistIdList(username, valid_ids)
+    return json.dumps({'artist_ids': user.artist_ids})
 
 
 @app.route("/")
