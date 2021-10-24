@@ -199,9 +199,26 @@ def save():
     return json.dumps({'artist_ids': user.artist_ids})
 
 
-@app.route("/")
-def main():
-    ...
+@app.route("/random-song", methods=["POST"])
+def random_song():
+    data = json.loads(request.data)
+    username = data['username']
+    user = DBHelpers.getUser(username)
+    artist_ids = user.artist_ids
+    print(artist_ids, 'artist ids!!!!')
+    random_id = random.choice(artist_ids)
+    preview_url, track_name, artist_name, img_url = get_track(random_id)
+    lyrics_url = get_song_url(track_name, artist_name)
+
+    _args = {
+        "preview_url": preview_url,
+        "track_name": track_name,
+        "artist_name": artist_name,
+        "img_url": img_url,
+        "lyrics_url": get_song_url(track_name, artist_name)
+    }
+
+    return json.dumps(_args)
 
 
 app.run(
