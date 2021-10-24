@@ -11,6 +11,7 @@ from flask_login import (
     current_user,
     login_required,
 )
+from flask_cors import CORS, cross_origin
 
 from spotify_stuff import get_track, artistid_isvalid
 from genius_stuff import get_song_url
@@ -22,12 +23,15 @@ import random
 
 import json
 
-app = flask.Flask(__name__, static_folder='./build/static')
-# This tells our Flask app to look at the results of `npm build` instead of the 
+app = flask.Flask(__name__, static_folder="./build/static")
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type' 
+# This tells our Flask app to look at the results of `npm build` instead of the
 # actual files in /templates when we're looking for the index page file. This allows
 # us to load React code into a webpage. Look up create-react-app for more reading on
 # why this is necessary.
 bp = flask.Blueprint("bp", __name__, template_folder="./build")
+
 
 def create_the_db_object():
     database_url = os.environ["DATABASE_URL"]  # get the location of the database
@@ -35,19 +39,24 @@ def create_the_db_object():
     app.config[
         "SQLALCHEMY_DATABASE_URI"
     ] = database_url  # tell flask where to find the database
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Add this line to fix a warning
+    app.config[
+        "SQLALCHEMY_TRACK_MODIFICATIONS"
+    ] = False  # Add this line to fix a warning
     db = SQLAlchemy(app)  # initialize the database object
     return db
+
 
 def enable_cookies():
     app.secret_key = bytes(
         os.environ["FLASK_SECRET_KEY"], "utf-8"
     )  # Necessary to use cookies (which flask login uses)
 
+
 def create_the_login_manager():
     login_manager = LoginManager()
     login_manager.init_app(app)
     return login_manager
+
 
 db = create_the_db_object()
 enable_cookies()
@@ -85,8 +94,51 @@ class User(db.Model):
 def load_user(username):
     return User.query.filter_by(username=username).first()
 
+class DBHelpers:
 
-@bp.route('/index')
+    @classmethod
+    def printAllUsers(cls):
+        print(User.query.all())
+    
+    @classmethod
+    def getUser(cls, username):
+        return User.query.filter_by(username=username).first()
+
+    @classmethod
+    def addNewUser(cls, name):
+        _user = User(username=name, artist_ids=[])
+        db.session.add(_user)
+        db.session.commit()
+    
+    @classmethod
+    def getArtistIds(cls, username):
+        return DBHelpers.getUser(username).artist_ids
+    
+    @classmethod
+    def removeAllData(cls):
+        db.drop_all()
+    
+    # this should be updated to make sure duplicate ids can't be added
+    @classmethod
+    def addArtistId(cls, username, artist_id): 
+        user = DBHelpers.getUser(username)
+        _ids = list(user.artist_ids)
+        _ids.append(artist_id)
+        user.artist_ids = _ids
+        db.session.commit()
+    
+    @classmethod
+    def addArtistIdList(cls, username, artist_ids):
+        user = DBHelpers.getUser(username)
+        _ids = list(user.artist_ids)
+        _ids.extend(artist_ids)
+        user.artist_ids = _ids
+        db.session.commit()
+
+
+
+
+@bp.route("/index")
 # @login_required
 def index():
     # TODO: insert the data fetched by your app main page here as a JSON
@@ -97,37 +149,79 @@ def index():
         data=data,
     )
 
+
 app.register_blueprint(bp)
 
-@app.route('/signup')
-def signup():
-	...
-
-@app.route('/signup', methods=["POST"])
+@app.route("/signup", methods=["POST"])
 def signup_post():
-	...
+    data = json.loads(request.data)
+    username = data['username']
+    user = User.query.filter_by(username=username).first()
+    if user != None:
+        return json.dumps({'username_taken': True})
+    else:
+        DBHelpers.addNewUser(username)
+        print(User.query.all())
+        return json.dumps({'username_taken': False})
 
-@app.route('/login')
+
+@app.route("/login", methods=["POST"])
 def login():
-    ...
+    print('attempting to log in')
+    data = json.loads(request.data)
+    username = data['username']
+    user = User.query.filter_by(username=username).first()
+    if user != None:
+        login_user(user)
 
-@app.route('/login', methods=["POST"])
-def login_post():
-	...
+        return json.dumps({'login_successful': True, 'username': current_user.username})
 
-@app.route('/save', methods=["POST"])
+    else:
+        return json.dumps({'login_successful': False})
+
+
+# @app.route("/login", methods=["POST"])
+# def login_post():
+#     ...
+
+
+@app.route("/save", methods=["POST"])
 def save():
-    ...
+    data = json.loads(request.data)
+    artist_ids = data['artist_ids']
+    username = data['username']
+    user = DBHelpers.getUser(username)
+    valid_ids = []
+    for _id in artist_ids:
+        if artistid_isvalid(_id):
+            valid_ids.append(_id)
+    DBHelpers.addArtistIdList(username, valid_ids)
+    return json.dumps({'artist_ids': user.artist_ids})
 
 
-@app.route('/')
-def main():
-	...
+@app.route("/random-song", methods=["POST"])
+def random_song():
+    data = json.loads(request.data)
+    username = data['username']
+    user = DBHelpers.getUser(username)
+    artist_ids = user.artist_ids
+    print(artist_ids, 'artist ids!!!!')
+    random_id = random.choice(artist_ids)
+    preview_url, track_name, artist_name, img_url = get_track(random_id)
+    lyrics_url = get_song_url(track_name, artist_name)
 
+    _args = {
+        "preview_url": preview_url,
+        "track_name": track_name,
+        "artist_name": artist_name,
+        "img_url": img_url,
+        "lyrics_url": get_song_url(track_name, artist_name)
+    }
 
+    return json.dumps(_args)
 
 
 app.run(
-    host=os.getenv('IP', '0.0.0.0'),
-    port=int(os.getenv('PORT', 8081)),
+    host=os.getenv("IP", "0.0.0.0"),
+    port=int(os.getenv("PORT", 8081)),
 )

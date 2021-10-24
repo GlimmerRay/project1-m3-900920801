@@ -20,25 +20,31 @@ import random
 
 app = flask.Flask(__name__)
 
+
 def create_the_db_object():
     database_url = os.environ["DATABASE_URL"]  # get the location of the database
     database_url = fix_db_url(database_url)  # fix the database_url to avoid an error
     app.config[
         "SQLALCHEMY_DATABASE_URI"
     ] = database_url  # tell flask where to find the database
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Add this line to fix a warning
+    app.config[
+        "SQLALCHEMY_TRACK_MODIFICATIONS"
+    ] = False  # Add this line to fix a warning
     db = SQLAlchemy(app)  # initialize the database object
     return db
+
 
 def enable_cookies():
     app.secret_key = bytes(
         os.environ["FLASK_SECRET_KEY"], "utf-8"
     )  # Necessary to use cookies (which flask login uses)
 
+
 def create_the_login_manager():
     login_manager = LoginManager()
     login_manager.init_app(app)
     return login_manager
+
 
 db = create_the_db_object()
 enable_cookies()
@@ -66,6 +72,7 @@ class User(db.Model):
     def __repr__(self):
         return "<User %r>" % self.username
 
+
 # flask login passes the value from get_id() in the User model
 # to load_user(), and you should tell it how to use that value
 # to load a user. Since I programmed the User model to return
@@ -77,11 +84,10 @@ def load_user(username):
 
 
 class DBHelpers:
-
     @classmethod
     def printAllUsers(cls):
         print(User.query.all())
-    
+
     @classmethod
     def getUser(cls, username):
         return User.query.filter_by(username=username).first()
@@ -91,23 +97,24 @@ class DBHelpers:
         _user = User(username=name, artist_ids=[])
         db.session.add(_user)
         db.session.commit()
-    
+
     @classmethod
     def getArtistIds(cls, username):
         return DBHelpers.getUser(username).artist_ids
-    
+
     @classmethod
     def removeAllData(cls):
         db.drop_all()
-    
+
     # this should be updated to make sure duplicate ids can't be added
     @classmethod
-    def addArtistId(cls, username, artist_id): 
+    def addArtistId(cls, username, artist_id):
         user = DBHelpers.getUser(username)
         _ids = list(user.artist_ids)
         _ids.append(artist_id)
         user.artist_ids = _ids
         db.session.commit()
+
 
 @app.route("/random-song")
 @login_required
@@ -149,7 +156,7 @@ def signup_form():
         username = request.form["username"]
         # If the username is already taken we should show an error!!
         if User.query.filter_by(username=username).first() != None:
-            flash('username is taken')
+            flash("username is taken")
             return flask.render_template("signup_form.html")
         else:
             DBHelpers.addNewUser(username)
@@ -167,6 +174,7 @@ def login():
         else:
             return flask.render_template("login_form.html", invalid_user=True)
     return flask.render_template("login_form.html", invalid_user=False)
+
 
 @app.route("/logout")
 def logout():

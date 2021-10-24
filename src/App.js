@@ -1,10 +1,13 @@
-import logo from './logo.svg';
 import './App.css';
-import { useState, useRef } from 'react';
-
+import SignUpPage from './components/SignUpPage.js'
+import LoginPage from './components/LoginPage.js'
 
 function App() {
-  return <p>hello world</p>
+  return (
+    <div className="App">
+      <LoginPage />
+    </div>
+  );
 }
 
 export default App;
