@@ -192,11 +192,14 @@ def save():
     username = data['username']
     user = DBHelpers.getUser(username)
     valid_ids = []
+    invalid_ids = []
     for _id in artist_ids:
         if artistid_isvalid(_id):
             valid_ids.append(_id)
+        else:
+            invalid_ids.append(_id)
     DBHelpers.addArtistIdList(username, valid_ids)
-    return json.dumps({'artist_ids': user.artist_ids})
+    return json.dumps({'valid_ids': valid_ids, 'invalid_ids': invalid_ids})
 
 
 @app.route("/random-song", methods=["POST"])
