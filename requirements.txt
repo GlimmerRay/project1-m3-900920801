@@ -3,3 +3,4 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 flask-cors
+psycopg2
