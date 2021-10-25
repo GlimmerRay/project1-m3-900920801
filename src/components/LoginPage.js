@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SignUpPage from './SignUpPage.js';
 import RandomSongPage from './RandomSongPage.js';
 
@@ -7,6 +7,11 @@ function LoginPage() {
     const [username, setUsername] = useState('');
     const [loggedIn, setLoggedIn] = useState(false);
     const [signUpPage, setSignUpPage] = useState(false);
+    const [baseUrl, setBaseUrl] = useState('')
+
+    useEffect(() => {
+        setBaseUrl(window.location.host)
+    }, [])
 
     function updateUsername(e) {
         if (!loggedIn) {
@@ -23,7 +28,7 @@ function LoginPage() {
             body: JSON.stringify({ 'username': username })
         }
 
-        fetch('http://192.168.1.127:8081/login', headers)
+        fetch('/login', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => setLoggedIn(data['login_successful']),
                 error => console.log(error));
