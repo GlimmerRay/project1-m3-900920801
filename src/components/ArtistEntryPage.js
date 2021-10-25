@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import RandomSongPage from './RandomSongPage.js';
 
 function ArtistIdForm(props) {
 
@@ -7,24 +6,28 @@ function ArtistIdForm(props) {
     const [newId, setNewId] = useState('')
     const [validIds, setValidIds] = useState([])
     const [invalidIds, setInvalidIds] = useState([])
+    const [canSubmit, setCanSubmit] = useState(false)
 
     function displayArtistIds() {
         const idListItems = []
         var key = 0
         for (var id of artistIds) {
-            idListItems.push(<li className='id-list-item' key={key}>{id}</li>)
+            idListItems.push(<li key={key}>{id}</li>)
             key = key + 1
         }
         return <>
-            <ul>{idListItems}</ul>
+            <ul className='new-id-list'>{idListItems}</ul>
         </>
     }
 
     async function addId() {
+        if (!canSubmit) {
+            setCanSubmit(true)
+        }
         setArtistIds([...artistIds, newId])
     }
 
-    function doSomething(e) {
+    function updateNewId(e) {
         setNewId(e.target.value)
     }
 
@@ -38,12 +41,15 @@ function ArtistIdForm(props) {
             })
         }
 
-        fetch('http://172.16.227.59:8081/save', headers)
+        setArtistIds([])
+        setNewId('')
+        setCanSubmit(false)
+
+        fetch('http://192.168.1.127:8081/save', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => setReturnData(data), error => console.log(error));
 
-        setArtistIds([])
-        setNewId('')
+
     }
 
     function setReturnData(data) {
@@ -57,7 +63,7 @@ function ArtistIdForm(props) {
             display.push(<li>{id}</li>)
         }
         if (display.length > 0) {
-            return <p>Saved the following ids: <ol>{display}</ol></p>
+            return <p>Saved the following ids: <ol className="valid-id-list">{display}</ol></p>
         }
     }
 
@@ -68,20 +74,19 @@ function ArtistIdForm(props) {
             display.push(<li>{id}</li>)
         }
         if (display.length > 0) {
-            return <p>These ids were invalid: <ol>{display}</ol></p>
+            return <p>These ids were invalid: <ol className="invalid-id-list">{display}</ol></p>
         }
     }
 
     return <>
-
-        {displayValidIds()}
-        {displayInvalidIds()}
-
-        {displayArtistIds()}
-        <input type="text" onChange={doSomething} value={newId}></input>
-        <button onClick={addId}>Add New Artist</button>
-        <button onClick={submitIds}>Submit</button>
-        {/* <RandomSongPage></RandomSongPage> */}
+        <div>
+            {displayValidIds()}
+            {displayInvalidIds()}
+            {displayArtistIds()}
+            <input type="text" onChange={updateNewId} value={newId}></input>
+            <button onClick={addId}>Add New Artist</button>
+            <button onClick={submitIds} disabled={!canSubmit}>Submit</button>
+        </div>
     </>
 }
 

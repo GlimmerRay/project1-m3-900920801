@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import LoginPage from './LoginPage.js';
+import RandomSongPage from './RandomSongPage.js';
 
 
 function SignUpPage() {
-    const [username, setUsername] = useState('');
-    const [loginPage, setLoginPage] = useState(false);
+    const [username, setUsername] = useState('')
+    const [switchTologinPage, setSwitchToLoginPage] = useState(false)
+    const [switchToRandomSongPage, setSwitchToRandomSongPage] = useState(false)
 
     function updateUsername(e) {
         setUsername(e.target.value)
@@ -19,18 +21,25 @@ function SignUpPage() {
             body: JSON.stringify({ 'username': username })
         }
 
-        fetch('http://172.16.227.59:8081/signup', headers)
+        fetch('http://192.168.1.127:8081/signup', headers)
             .then(response => response.json(), error => console.log(error))
-            .then(data => console.log(data), error => console.log(error));
+            .then(data => handleResponse(data), error => console.log(error));
+    }
+
+    function handleResponse(data) {
+        console.log(data)
+        setSwitchToLoginPage(true)
     }
 
     function switchToLogin() {
-        setLoginPage(true)
+        setSwitchToLoginPage(true)
     }
 
-    if (loginPage) {
+    if (switchTologinPage) {
         return <LoginPage />
-    } else {
+    } else if (switchToRandomSongPage)
+        return <RandomSongPage />
+    else {
         return <>
             <h1>Sign Up Page</h1>
             <input type='text' onChange={updateUsername} />

@@ -23,7 +23,7 @@ function LoginPage() {
             body: JSON.stringify({ 'username': username })
         }
 
-        fetch('http://10.250.90.74:8081/login', headers)
+        fetch('http://192.168.1.127:8081/login', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => setLoggedIn(data['login_successful']),
                 error => console.log(error));
@@ -34,7 +34,7 @@ function LoginPage() {
     }
 
     if (loggedIn) {
-        return <RandomSongPage />
+        return <RandomSongPage username={username} />
     } else if (signUpPage) {
         return <SignUpPage />
     } else {
