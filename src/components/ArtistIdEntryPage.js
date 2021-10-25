@@ -45,7 +45,7 @@ function ArtistIdEntryPage(props) {
         setNewId('')
         setCanSubmit(false)
 
-        fetch('http://192.168.1.127:8081/save', headers)
+        fetch('/save', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => setReturnData(data), error => console.log(error));
 

@@ -19,7 +19,7 @@ function RandomSongPage(props) {
     useEffect(() => { fetchRandomSong() }, [])
 
     function fetchRandomSong() {
-        fetch('http://192.168.1.127:8081/random-song', headers)
+        fetch('/random-song', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => setArtistData(data), error => console.log(error));
     }

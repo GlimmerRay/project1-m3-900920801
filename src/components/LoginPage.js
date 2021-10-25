@@ -7,11 +7,6 @@ function LoginPage() {
     const [username, setUsername] = useState('');
     const [loggedIn, setLoggedIn] = useState(false);
     const [signUpPage, setSignUpPage] = useState(false);
-    const [baseUrl, setBaseUrl] = useState('')
-
-    useEffect(() => {
-        setBaseUrl(window.location.host)
-    }, [])
 
     function updateUsername(e) {
         if (!loggedIn) {

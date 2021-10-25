@@ -21,7 +21,7 @@ function SignUpPage() {
             body: JSON.stringify({ 'username': username })
         }
 
-        fetch('http://192.168.1.127:8081/signup', headers)
+        fetch('/signup', headers)
             .then(response => response.json(), error => console.log(error))
             .then(data => handleResponse(data), error => console.log(error));
     }
