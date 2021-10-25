@@ -138,7 +138,7 @@ class DBHelpers:
 
 
 
-@bp.route("/index")
+@bp.route("/")
 # @login_required
 def index():
     # TODO: insert the data fetched by your app main page here as a JSON
