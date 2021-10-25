@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function ArtistIdForm(props) {
+function ArtistIdEntryPage(props) {
 
     const [artistIds, setArtistIds] = useState([])
     const [newId, setNewId] = useState('')
@@ -90,4 +90,4 @@ function ArtistIdForm(props) {
     </>
 }
 
-export default ArtistIdForm;
+export default ArtistIdEntryPage;
